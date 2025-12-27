@@ -1,0 +1,74 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>বাংলা AI Movie Service</title>
+<style>
+body { background:#111; color:#fff; font-family:sans-serif; text-align:center; padding:20px; }
+input, button { padding:10px; margin:5px; border-radius:5px; border:none; }
+button { background:#4CAF50; color:#fff; cursor:pointer; }
+img { width:200px; border-radius:10px; margin-top:10px; }
+#result { margin-top:20px; font-size:18px; white-space: pre-line; }
+</style>
+</head>
+<body>
+<h2>🎬 বাংলা AI Movie Service</h2>
+
+<input id="q" placeholder="মুভির নাম লিখুন (BN / EN)">
+<button onclick="searchMovie()">Search</button>
+
+<p id="result"></p>
+<img id="poster" src="">
+
+<script>
+async function searchMovie() {
+  const movieName = document.getElementById("q").value.trim();
+  const resultEl = document.getElementById("result");
+  const posterEl = document.getElementById("poster");
+
+  if(!movieName){
+    resultEl.innerText = "মুভির নাম লিখুন";
+    posterEl.src = "";
+    return;
+  }
+
+  resultEl.innerText = "Loading...";
+  posterEl.src = "";
+
+  try {
+    // OMDb API key
+    const omdbApiKey = "ac57015f"; // Replace with your OMDb API key
+    const omdbRes = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(movieName)}&apikey=${omdbApiKey}`);
+    const movieData = await omdbRes.json();
+
+    if(movieData.Response === "False"){
+      resultEl.innerText = "❌ দুঃখিত, মুভির তথ্য পাওয়া যায়নি";
+      return;
+    }
+
+    // Movie info
+    const name = movieData.Title;
+    const year = movieData.Year;
+    const actors = movieData.Actors;
+    const plotEn = movieData.Plot;
+    const poster = movieData.Poster;
+
+    // Simple English -> Bengali replacement
+    let plotBn = plotEn
+      .replace(/is/gi,"হলো")
+      .replace(/are/gi,"হল")
+      .replace(/The/gi,"")
+      .replace(/and/gi,"এবং");
+
+    resultEl.innerText = `নাম: ${name}\nসাল: ${year}\nঅভিনেতা: ${actors}\nপ্লট: ${plotBn}`;
+    posterEl.src = poster;
+
+  } catch(err) {
+    resultEl.innerText = "❌ কিছু ভুল হয়েছে, আবার চেষ্টা করুন";
+    console.error(err);
+  }
+}
+</script>
+</body>
+</html>
